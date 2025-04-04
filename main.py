@@ -10,8 +10,69 @@ from pathlib import Path
 # --- Global Variables ---
 WHISPER_MODEL = None
 MODEL_SIZE = "medium"  # Choose: tiny, base, small, medium, large, large-v2, large-v3
-LANGUAGE_CODE = "zh"  # Chinese (will work for Cantonese)
 DEFAULT_OUTPUT_DIR = os.path.join(os.getcwd(), "outputs")
+
+# Language options for the dropdown
+LANGUAGES = {
+    "auto": "Auto Detect",
+    "af": "Afrikaans",
+    "ar": "Arabic",
+    "hy": "Armenian",
+    "az": "Azerbaijani",
+    "be": "Belarusian",
+    "bs": "Bosnian",
+    "bg": "Bulgarian",
+    "ca": "Catalan",
+    "zh": "Chinese",
+    "hr": "Croatian",
+    "cs": "Czech",
+    "da": "Danish",
+    "nl": "Dutch",
+    "en": "English",
+    "et": "Estonian",
+    "fi": "Finnish",
+    "fr": "French",
+    "gl": "Galician",
+    "de": "German",
+    "el": "Greek",
+    "he": "Hebrew",
+    "hi": "Hindi",
+    "hu": "Hungarian",
+    "is": "Icelandic",
+    "id": "Indonesian",
+    "it": "Italian",
+    "ja": "Japanese",
+    "kn": "Kannada",
+    "kk": "Kazakh",
+    "ko": "Korean",
+    "lv": "Latvian",
+    "lt": "Lithuanian",
+    "mk": "Macedonian",
+    "ms": "Malay",
+    "mr": "Marathi",
+    "mi": "Maori",
+    "ne": "Nepali",
+    "no": "Norwegian",
+    "fa": "Persian",
+    "pl": "Polish",
+    "pt": "Portuguese",
+    "ro": "Romanian",
+    "ru": "Russian",
+    "sr": "Serbian",
+    "sk": "Slovak",
+    "sl": "Slovenian",
+    "es": "Spanish",
+    "sw": "Swahili",
+    "sv": "Swedish",
+    "tl": "Tagalog",
+    "ta": "Tamil",
+    "th": "Thai",
+    "tr": "Turkish",
+    "uk": "Ukrainian",
+    "ur": "Urdu",
+    "vi": "Vietnamese",
+    "cy": "Welsh"
+}
 
 # --- Helper Functions ---
 
@@ -71,7 +132,7 @@ def save_output_files(output_dir: str, video_name: str, transcription_text: str,
     
     return str(video_path), str(text_path), str(srt_path)
 
-def transcribe_video_from_url(url: str, output_dir: str = DEFAULT_OUTPUT_DIR):
+def transcribe_video_from_url(url: str, output_dir: str = DEFAULT_OUTPUT_DIR, language: str = "auto"):
     """Downloads video, transcribes, and saves all files to the specified directory."""
     if not WHISPER_MODEL:
         print("Error: Whisper model not loaded.")
@@ -80,8 +141,8 @@ def transcribe_video_from_url(url: str, output_dir: str = DEFAULT_OUTPUT_DIR):
     if not url:
         return "Please enter a video URL.", None, None
 
-    if not output_dir:
-        return "Please select an output directory.", None, None
+    # Replace empty or default output directory with video-title based directory
+    using_default = not output_dir or output_dir == DEFAULT_OUTPUT_DIR
 
     print(f"Processing URL: {url}")
     temp_dir = None
@@ -113,8 +174,10 @@ def transcribe_video_from_url(url: str, output_dir: str = DEFAULT_OUTPUT_DIR):
 
         # Transcribe using Whisper
         print("Starting transcription...")
+        # Set language to None for auto-detection
+        whisper_language = None if language == "auto" else language
         result = WHISPER_MODEL.transcribe(
-            temp_video_path, language=LANGUAGE_CODE, verbose=True, fp16=False
+            temp_video_path, language=whisper_language, verbose=True, fp16=False
         )
         print("Transcription complete.")
 
@@ -122,8 +185,15 @@ def transcribe_video_from_url(url: str, output_dir: str = DEFAULT_OUTPUT_DIR):
         transcription_text = result["text"]
         srt_content = generate_srt_content(result)
 
-        # Save all files to the user-selected directory
+        # Create safe title for directory name
         safe_title = "".join(c for c in video_title if c.isalnum() or c in (' ', '-', '_')).strip()
+        
+        # If using default directory, create a subdirectory with the video title
+        if using_default:
+            output_dir = os.path.join(DEFAULT_OUTPUT_DIR, safe_title)
+            print(f"Created output directory based on video title: {output_dir}")
+
+        # Save all files
         video_path, text_path, srt_path = save_output_files(
             output_dir, safe_title, transcription_text, srt_content, temp_video_path
         )
@@ -171,9 +241,9 @@ if __name__ == "__main__":
     Path(DEFAULT_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
     
     # Create the Gradio interface using Blocks
-    with gr.Blocks(title="Video Transcriber (Cantonese)") as app:
-        gr.Markdown(f"# Video Transcriber (Cantonese)")
-        gr.Markdown(f"Enter a video URL to download and transcribe it into Cantonese text and SRT format using the local Whisper '{MODEL_SIZE}' model.")
+    with gr.Blocks(title="Video Transcriber") as app:
+        gr.Markdown(f"# Multi-Language Video Transcriber")
+        gr.Markdown(f"Enter a video URL to download and transcribe it using the local Whisper '{MODEL_SIZE}' model. Choose your target language or let Whisper auto-detect it.")
         
         with gr.Row():
             with gr.Column():
@@ -190,6 +260,14 @@ if __name__ == "__main__":
                 )
                 select_btn = gr.Button("📂 Browse Output Directory", variant="primary")
                 
+                # Add language dropdown
+                language_dropdown = gr.Dropdown(
+                    choices=list(LANGUAGES.values()), 
+                    value="Auto Detect",
+                    label="Transcription Language",
+                    info="Select target language or Auto Detect"
+                )
+                
                 # Add transcribe button
                 transcribe_btn = gr.Button("🎯 Transcribe Video", variant="primary", size="large")
                 
@@ -201,19 +279,27 @@ if __name__ == "__main__":
         # Add helpful notes
         gr.Markdown("""
         ### Notes:
-        - Files will be saved with the original video title
+        - By default, files are saved in a folder named after the video
         - Each transcription creates three files:
           - Video file (.mp4)
           - Subtitles file (.srt)
           - Text transcription (.txt)
-        - Use the Browse button to choose where to save your files
+        - Use the Browse button to choose a specific output folder, or let the app organize files automatically
         """)
         
         # Wire up the events
         select_btn.click(fn=select_directory, outputs=output_dir)
+        # Wire up the events
+        def get_language_code(language_name):
+            # Find the language code for the selected language name
+            for code, name in LANGUAGES.items():
+                if name == language_name:
+                    return code
+            return "auto"  # Default to auto if not found
+            
         transcribe_btn.click(
-            fn=transcribe_video_from_url,
-            inputs=[url_input, output_dir],
+            fn=lambda url, dir, lang: transcribe_video_from_url(url, dir, get_language_code(lang)),
+            inputs=[url_input, output_dir, language_dropdown],
             outputs=[transcription, srt_file, text_file]
         )
     
