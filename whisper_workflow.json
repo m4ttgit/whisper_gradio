@@ -1,0 +1,84 @@
+{
+  "name": "Whisper Gradio API Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "lookup",
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "Sheet1!A1:B10",
+        "key": "id",
+        "value": "1"
+      },
+      "id": "2",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:7860/run/predict",
+        "method": "POST",
+        "responseFormat": "json",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "{\n  \"data\": [\n    \"{{$json[\"videoUrl\"]}}\",\n    null,\n    \"D:\\\\Projects\\\\whisper_gradio\\\\outputs\",\n    \"Auto Detect\",\n    \"Local Whisper\",\n    \"medium\",\n    \"whisper-large-v3\",\n    false\n  ],\n  \"fn_index\": 123\n}"
+      },
+      "id": "3",
+      "name": "Call Whisper API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Call Whisper API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "tags": []
+}
