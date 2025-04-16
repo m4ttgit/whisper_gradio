@@ -1,18 +1,20 @@
-# Video Transcriber (Whisper via Local & Groq API)
+# Video Transcriber (Cantonese)
 
-A Python application that downloads videos from various sources (YouTube, Vimeo, etc.) and transcribes them using OpenAI's Whisper model. It supports both local processing and transcription via the Groq API for faster performance. The application provides text transcription and SRT subtitle files.
+A Python application that downloads videos from various sources (YouTube, Vimeo, etc.) and transcribes them using either local Whisper model or Groq API. The application provides both text transcription and SRT subtitle files.
 
 ## Features
 
 - Downloads videos from various sources (YouTube, Vimeo, direct links)
-- Transcribes audio using Whisper (supports local processing or Groq API)
+- Multiple transcription options:
+  - Local Whisper model for offline processing
+  - Groq API for cloud-based transcription with translation capability
+- Supports multiple languages with auto-detection
 - Generates SRT subtitle files with timestamps
-- User-friendly Gradio web interface
+- User-friendly Gradio web interface with FastAPI backend
 - Customizable output directory
 - Supports multiple video formats
 - Handles temporary files automatically
 - Saves original video along with transcription
-- Configuration via `.env` file for API keys
 
 ## Requirements
 
@@ -30,28 +32,23 @@ groq>=0.4.0
 python-dotenv>=1.0.0
 ```
 
-Additionally, you need [FFmpeg](https://ffmpeg.org/download.html) installed on your system and available in your PATH.
+Additionally, you need:
+- FFmpeg installed on your system
+- Groq API key (optional, for using Groq API features)
 
 ## Installation
 
-1.  Clone this repository:
-    ```bash
-    git clone <repository_url>
-    cd <repository_directory>
-    ```
-2.  Create a `.env` file by copying the example:
-    ```bash
-    copy .env.example .env
-    ```
-    (Use `cp .env.example .env` on Linux/macOS)
-3.  Edit the `.env` file and add your Groq API key:
-    ```
-    GROQ_API_KEY=your_actual_groq_api_key
-    ```
-4.  Install the required packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
+1. Clone this repository
+2. Install the required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. (Optional) For Groq API:
+   - Copy `.env.example` to `.env`
+   - Add your Groq API key to `.env`:
+     ```
+     GROQ_API_KEY=your-api-key-here
+     ```
 
 ## Usage
 
@@ -60,13 +57,25 @@ Additionally, you need [FFmpeg](https://ffmpeg.org/download.html) installed on y
    python main.py
    ```
 
-2. Access the web interface through your browser (typically at http://localhost:7860)
+2. Access the web interface through your browser:
+   - Gradio UI: http://localhost:7860
+   - FastAPI endpoints: http://localhost:7861
 
-3. Enter a video URL in the input field
+3. Choose transcription method:
+   - Local Whisper: Uses local CPU/GPU for processing
+   - Groq API: Cloud-based processing with additional features
 
-4. (Optional) Click "Browse Output Directory" to choose where to save the files
+4. Input options:
+   - Enter a video URL
+   - Upload a video file
 
-5. Click "Transcribe Video" to start the process
+5. Configure settings:
+   - Select language or use auto-detection
+   - Choose model size/version
+   - Enable translation (Groq API only)
+   - (Optional) Select output directory
+
+6. Click "Transcribe Video" to start the process
 
 ## Output Files
 
@@ -76,22 +85,46 @@ For each transcription, the following files are generated in the output director
 - `{video_title}.srt` - Subtitle file with timestamps
 - `{video_title}.txt` - Plain text transcription
 
-## Configuration
+## Model Information
 
--   **API Keys**: The application requires API keys for certain services (like Groq). These should be stored in a `.env` file in the project root. Create this file by copying `.env.example` and filling in your keys.
--   **Local Model**: If using local transcription, the Whisper model size can be configured in `main.py`. The default is `medium`.
+### Local Whisper Models
+The application uses the Whisper `medium` model by default for local processing. Available model sizes:
+- tiny
+- base
+- small
+- medium (default)
+- large
+- large-v2
+- large-v3
+
+### Groq API Models
+When using Groq API, the following models are available:
+- whisper-large-v3 (default)
+- whisper-large-v3-turbo
+- distil-whisper-large-v3-en
+
+Groq API features:
+- Faster processing times compared to local models
+- Optional translation to English
+- Optimized for English transcription with distil model
 
 ## Notes
 
-- The application can utilize either local Whisper processing or the Groq API for transcription, potentially configurable in the interface or code.
-- Files are automatically saved with the original video title (sanitized for filesystem compatibility).
-- Temporary files are cleaned up automatically after processing.
-- For local GPU acceleration, ensure you have a compatible NVIDIA GPU and necessary drivers/CUDA toolkit installed. Relevant settings might be in `transcription.py` or `utils.py`.
+- The model is loaded when the application starts
+- Files are automatically saved with the original video title (sanitized for filesystem compatibility)
+- Temporary files are cleaned up automatically after processing
+- For GPU acceleration, uncomment the CUDA line in `load_whisper_model()` if you have a compatible NVIDIA GPU
 
 ## Default Settings
 
-- Default Output Directory: `./outputs/`
-- Local Model Size (if used): `medium` (configurable in code)
-- API Provider (if used): Groq (requires API key in `.env`)
+- Local Whisper:
+  - Model Size: medium
+  - Language: Auto Detect
+  - Default Output Directory: `./outputs/`
 
-Check `main.py` or related configuration files for specific default parameters.
+- Groq API:
+  - Model: whisper-large-v3
+  - Translation: Disabled by default
+  - Language: Auto Detect
+
+These settings can be modified through the web interface or by adjusting the global variables in `main.py`.

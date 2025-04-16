@@ -1,0 +1,634 @@
+{
+  "name": "Whisper Gradio API -  YT Transcription SRT",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1460,
+        -240
+      ],
+      "id": "c0ce5de7-c1cb-4747-a1c1-4e1bddcca5b4",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc",
+          "mode": "list",
+          "cachedResultName": "acsmht_unique_rows",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1284630899,
+          "mode": "list",
+          "cachedResultName": "milt_test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit#gid=1284630899"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1240,
+        -240
+      ],
+      "id": "12fcc0d8-de95-4ca0-8aab-ab02c46840b3",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MpbvyDUP1FRm8HRw",
+          "name": "Google Sheets account m4tthias@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -500,
+        -260
+      ],
+      "id": "5f75c212-f715-4510-8cd5-a1756969b4d6",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "745a2790-5319-4848-b686-3a01462c0dd2",
+              "name": "urls",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "d2a83ac6-c09f-4473-8a5b-d509e01f6393",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "48ec819f-5926-44e5-8040-1e965482e401",
+              "name": "Processed",
+              "value": "={{ $json.processed }}",
+              "type": "string"
+            },
+            {
+              "id": "e29851f5-1ea7-4f64-8e37-8c7559d0599e",
+              "name": "dir",
+              "value": "D:/Projects/acsm/温偉耀博士/",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1020,
+        -240
+      ],
+      "id": "06ee34c3-6358-4851-8e87-6eb4e5ff2395",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "https://community.n8n.io/t/transcribe-whatsapp-audio-message-using-google-gemini-api/95518"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1780,
+        -280
+      ],
+      "typeVersion": 1,
+      "id": "c7103e9a-dd4d-48b8-b913-6ae3ea9e7ca0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Where:\n\n1st: url (string)\n2nd: file (null since no file)\n3rd: dir (string)\n4th: lang (string)\n5th: model_choice (string)\n6th: local_model (string)\n7th: groq_model (string)\n8th: translate (boolean)",
+        "height": 220,
+        "width": 260
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1800,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "4d48b743-7746-4f17-88de-c38181591f1f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input item\nconst inputData = $input.item.json;\n\n// Extract and sanitize values\nconst dir = (inputData.dir || \"$input.first().json.dir\").trim().replace(/\\\\/g, \"/\");\nconst title = (inputData.title || \"$input.first().json.title\").trim();\n\n// const dir = ($input.first().json.dir || \"\").trim().replace(/\\\\/g, \"/\");\n// const title = ($input.first().json.title || \"\").trim();\n\n// Validate input\nif (!dir || !title) {\n  throw new Error(\"Missing 'dir' or 'title'\");\n}\n\n// Build full folder path\nconst fullPath = `${dir}${title}`;\n\n// Output the constructed path\nreturn {\n  folderPath: fullPath\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1320,
+        60
+      ],
+      "id": "a653e94a-d9f2-46e6-b959-d1f93bf6a684",
+      "name": "Create Folder"
+    },
+    {
+      "parameters": {
+        "command": "=if not exist \"{{ $json.folderPath }}\" mkdir \"{{ $json.folderPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        60
+      ],
+      "id": "89c782ad-c3a0-49be-955f-378ce56cb370",
+      "name": "Execute Command",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:7861/gradio/job_status?",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "job_id",
+              "value": "={{ $('Whisper Transcribe').item.json.job_ids[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        300
+      ],
+      "id": "70e993e6-6629-4a9e-b45e-6be2df186da5",
+      "name": "Job status"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "84fb873d-7b98-4495-a019-f8c9fc6ce22c",
+              "name": "folderPath",
+              "value": "={{ $('Create Folder').item.json.folderPath }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1440,
+        300
+      ],
+      "id": "58cddf98-72ac-4bce-bf17-8fd07da34424",
+      "name": "Folder Path"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:7861/gradio/handle_transcription",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [\n    {\n      \"url\": \"{{ $('Loop Over Items').item.json.urls }}\",\n      \"dir\": \"{{ $json.folderPath }}\",\n      \"lang\": \"Chinese\",\n      \"model_choice\": \"Local Whisper\",\n      \"local_model\": \"medium\",\n      \"groq_model\": \"whisper-large-v3\",\n      \"translate\": false\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1180,
+        300
+      ],
+      "id": "beee3eb5-d3fc-4002-b9c2-06bfa8ee9027",
+      "name": "Whisper Transcribe",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "Create Folder\n",
+        "height": 200,
+        "width": 680,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1500,
+        20
+      ],
+      "typeVersion": 1,
+      "id": "ad2728be-c550-4494-b91d-9ca319fd6340",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Transcribe Files\n",
+        "height": 480,
+        "width": 1340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1500,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "9da71c54-d661-4822-8a88-9c0ccb46a39e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Filter Files from Database for Transcription",
+        "height": 300,
+        "width": 1340,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1500,
+        -300
+      ],
+      "typeVersion": 1,
+      "id": "83371539-2846-45eb-847c-0f9fa9ee3587",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a7abe500-a7c7-4ff6-9f34-0074129d5578",
+              "leftValue": "={{ $json.Processed }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        -240
+      ],
+      "id": "c87a10c6-5a7f-4f00-82e2-76c4848ec458",
+      "name": "If not Processed"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc",
+          "mode": "list",
+          "cachedResultName": "acsmht_unique_rows",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1284630899,
+          "mode": "list",
+          "cachedResultName": "milt_test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit#gid=1284630899"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "processed": "yes",
+            "url": "={{ $('Loop Over Items').item.json.urls }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -360,
+        500
+      ],
+      "id": "f7df83bb-99ec-46d4-b141-bbc12ba0851b",
+      "name": "Update Processed Status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MpbvyDUP1FRm8HRw",
+          "name": "Google Sheets account m4tthias@gmail.com"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        280
+      ],
+      "id": "4950fb2b-94e3-4b00-8f4f-14952e057219",
+      "name": "30 Seconds",
+      "webhookId": "6cc8c637-bafb-4d64-9cd4-8ae2a9f5b7ca"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -940,
+        300
+      ],
+      "id": "755b2c34-1319-4f2a-beeb-279848adfa71",
+      "name": "10 min",
+      "webhookId": "6cc8c637-bafb-4d64-9cd4-8ae2a9f5b7ca",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ff812e47-d747-4f1a-8fa8-9f3d40ec2acd",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "complete",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        300
+      ],
+      "id": "8abfe0c3-2c27-4335-8a24-641d7d42ec45",
+      "name": "If Complete",
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If not Processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Folder": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Folder Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job status": {
+      "main": [
+        [
+          {
+            "node": "If Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Folder Path": {
+      "main": [
+        [
+          {
+            "node": "Whisper Transcribe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whisper Transcribe": {
+      "main": [
+        [
+          {
+            "node": "10 min",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If not Processed": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Update Processed Status": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "30 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Job status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 min": {
+      "main": [
+        [
+          {
+            "node": "Job status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Complete": {
+      "main": [
+        [
+          {
+            "node": "Update Processed Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "30 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "da4db954-d90f-40c1-86fd-a733f455a04e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "367ade3b4be6f21ffb1a756991fcdc914d8213e9345b5b839e14a8873782f190"
+  },
+  "id": "YUGFHt8s69Sz2fA5",
+  "tags": [
+    {
+      "createdAt": "2024-12-09T09:57:47.604Z",
+      "updatedAt": "2024-12-09T09:57:47.604Z",
+      "id": "BsjWfkCjUhz94kEx",
+      "name": "matthias chin"
+    }
+  ]
+}
