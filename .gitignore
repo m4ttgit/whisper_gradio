@@ -36,3 +36,5 @@ outputs/
 *.srt
 *.txt
 !requirements.txt
+.env
+
