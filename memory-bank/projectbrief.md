@@ -10,7 +10,7 @@
     - Manage dependencies (`requirements.txt`).
     - Provide documentation (`README.md`, `api_doc.md`, `groq_api.md`).
     - Include utility scripts for related tasks (e.g., downloading, URL extraction).
-- **Interface:** A web-based interface built with Gradio.
+- **Interface:** A web-based interface built with Gradio, running on port 7861.
 - **Workflow:** A defined workflow, possibly described in `whisper_workflow.json`.
 - **Configuration:** Use environment variables for sensitive information (`.env.example`).
 
