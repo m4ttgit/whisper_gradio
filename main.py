@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from typing import List
 
+
 class TranscriptionRequest(BaseModel):
     url: Optional[str] = None
     dir: str = ""
@@ -21,8 +22,10 @@ class TranscriptionRequest(BaseModel):
     groq_model: str = "whisper-large-v3"
     translate: bool = False
 
+
 class TranscriptionRequestWrapper(BaseModel):
     data: List[TranscriptionRequest]
+
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -38,8 +41,11 @@ fastapi_app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @fastapi_app.post("/gradio/handle_transcription")
-async def handle_transcription_json_api(request: TranscriptionRequestWrapper = Body(...)):
+async def handle_transcription_json_api(
+    request: TranscriptionRequestWrapper = Body(...),
+):
     job_ids = []
     for req in request.data:
         job_id = str(uuid.uuid4())
@@ -71,6 +77,7 @@ async def handle_transcription_json_api(request: TranscriptionRequestWrapper = B
         job_ids.append(job_id)
     return {"job_ids": job_ids}
 
+
 @fastapi_app.get("/gradio/job_status")
 async def job_status(job_id: str):
     with job_store_lock:
@@ -83,6 +90,7 @@ async def job_status(job_id: str):
             return {"status": "failed", "result": job["result"]}
         else:
             return {"status": "pending"}
+
 
 def submit_transcription_job_api(
     url: str = Form(None),
@@ -121,6 +129,7 @@ def submit_transcription_job_api(
     )
     thread.start()
     return {"job_id": job_id}
+
 
 from transcription import (
     load_whisper_model,
@@ -204,11 +213,13 @@ LANGUAGES = {
     "zu": "Zulu",
 }
 
+
 def get_language_code(language_name):
     for code, name in LANGUAGES.items():
         if name == language_name:
             return code
     return "auto"
+
 
 def handle_transcription(
     url, file, dir, lang, model_choice, local_model, groq_model, translate
@@ -277,54 +288,126 @@ def handle_transcription(
                 )
                 return result["text"], srt_path, text_path, video_path_out
             else:
-                import tempfile, yt_dlp, shutil
+                import tempfile, shutil, subprocess
 
                 temp_dir = tempfile.mkdtemp()
+                video_path = None
                 try:
-                    with yt_dlp.YoutubeDL(
-                        {
-                            "format": "best",
-                            "outtmpl": os.path.join(temp_dir, "%(title)s.%(ext)s"),
-                        }
-                    ) as ydl:
-                        info = ydl.extract_info(url, download=True)
-                        video_path = os.path.join(temp_dir, os.listdir(temp_dir)[0])
-                        result = transcribe_with_groq(
-                            video_path, lang_code, groq_model, translate
-                        )
-                        video_title_from_url = info.get("title", "")
-                        safe_title_url = "".join(
-                            c
-                            for c in video_title_from_url
-                            if c.isalnum() or c in (" ", "-", "_")
-                        ).strip()
-                        if not safe_title_url:
-                            safe_title_url = "".join(
-                                c
-                                for c in os.path.splitext(os.path.basename(video_path))[0]
-                                if c.isalnum() or c in (" ", "-", "_")
-                            ).strip()
-                        safe_title = safe_title_url
-                        # Use user-specified dir if provided, else default
-                        if dir:
-                            output_dir = dir
-                        else:
-                            output_dir = os.path.join(DEFAULT_OUTPUT_DIR, safe_title)
-                        from transcription import save_output_files, generate_srt_content
+                    # Use subprocess to run yt-dlp command directly with enhanced options to bypass 403 errors
+                    command = [
+                        "yt-dlp",
+                        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        "--referer", "https://www.youtube.com/",
+                        "--add-header", "Accept-Language:en-US,en;q=0.9",
+                        "--add-header", "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "--add-header", "DNT:1",
+                        "--add-header", "Upgrade-Insecure-Requests:1",
+                        "--no-check-certificates",
+                        "--extractor-retries", "10",
+                        "--retries", "10",
+                        "--fragment-retries", "10",
+                        "--skip-unavailable-fragments",
+                        "--keep-fragments",
+                        "--geo-bypass",
+                        "--no-playlist",
+                        "--no-warnings",
+                        "--sleep-requests", "1",
+                        "--min-sleep-interval", "1",
+                        "--max-sleep-interval", "5",
+                        "--force-ipv4",
+                        "--http-chunk-size", "1048576",
+                        "--buffer-size", "16M",
+                        "--concurrent-fragments", "1",
+                        "-f", "best[ext=mp4][height<=720]/best[height<=720]/18/mp4",  # Multiple format fallbacks
+                        "-o", os.path.join(temp_dir, "%(title)s.%(ext)s"),
+                        url,
+                    ]
 
-                        srt_content = generate_srt_content(result)
-                        video_path_out, text_path, srt_path = save_output_files(
-                            output_dir,
-                            safe_title,
-                            result["text"],
-                            srt_content,
-                            video_path,
-                        )
-                        return result["text"], srt_path, text_path, video_path_out
+                    # Try with cookies first, then fallback without cookies
+                    cookie_file_path = os.getenv("YT_DLP_COOKIE_FILE")
+                    base_command = command.copy()
+
+                    success = False
+                    attempts = [
+                        ("with cookies", lambda: base_command + (["--cookies", cookie_file_path] if cookie_file_path and os.path.exists(cookie_file_path) else [])),
+                        ("without cookies", lambda: base_command),
+                        ("aggressive mode", lambda: base_command + ["--force-generic-extractor", "--no-cache-dir", "--rm-cache-dir"]),
+                        ("no fragments", lambda: [arg for arg in base_command if arg not in ["--keep-fragments", "--concurrent-fragments", "1"]] + ["--no-part"]),
+                        ("different format", lambda: base_command + ["-f", "18/best[height<=480]/best"])
+                    ]
+
+                    for attempt_name, get_command in attempts:
+                        if success:
+                            break
+
+                        command = get_command()
+                        print(f"Trying {attempt_name}...")
+                        print(f"Executing yt-dlp command: {' '.join(command)}")
+                        process = subprocess.run(command, capture_output=True, text=True, cwd=temp_dir)
+
+                        if process.returncode == 0:
+                            print(f"SUCCESS: Download successful using {attempt_name}")
+                            success = True
+                        else:
+                            print(f"FAILED {attempt_name}: Exit code {process.returncode}")
+                            print(f"STDERR: {process.stderr}")
+                            print(f"STDOUT: {process.stdout}")
+                            if attempt_name == "with cookies" and cookie_file_path:
+                                print(f"Warning: Cookie file {cookie_file_path} may be invalid or outdated")
+                            if "403" in process.stderr or "Forbidden" in process.stderr:
+                                print(f"403 Forbidden error detected in {attempt_name}")
+
+                    if not success:
+                        raise Exception(f"yt-dlp download failed after all attempts. Last error: {process.stderr}")
+
+                    print(f"yt-dlp command output:\n{process.stdout}")
+
+                    # Find the downloaded file (should be mp4 for format 234)
+                    downloaded_files = os.listdir(temp_dir)
+                    downloaded_file = next((f for f in downloaded_files if f.endswith(".mp4")), None)
+                    if downloaded_file is None:
+                         raise Exception("Failed to find downloaded mp4 file.")
+                    video_path = os.path.join(temp_dir, downloaded_file)
+
+                    # Get video title from yt-dlp info (can parse stdout or re-run info extraction)
+                    # For simplicity, let's try to get it from stdout or use a default
+                    video_title_from_url = "downloaded_video" # Default title
+                    # A more robust way would be to run yt-dlp --print title <url> separately
+
+                    safe_title = "".join(
+                        c
+                        for c in video_title_from_url
+                        if c.isalnum() or c in (" ", "-", "_")
+                    ).strip()
+                    if not safe_title:
+                         safe_title = "downloaded_video"
+
+                    result = transcribe_with_groq(
+                        video_path, lang_code, groq_model, translate
+                    )
+
+                    # Use user-specified dir if provided, else default
+                    if dir:
+                        output_dir = dir
+                    else:
+                        output_dir = os.path.join(DEFAULT_OUTPUT_DIR, safe_title)
+                    from transcription import save_output_files, generate_srt_content
+
+                    srt_content = generate_srt_content(result)
+                    video_path_out, text_path, srt_path = save_output_files(
+                        output_dir,
+                        safe_title,
+                        result["text"],
+                        srt_content,
+                        video_path,
+                    )
+                    return result["text"], srt_path, text_path, video_path_out
                 finally:
-                    shutil.rmtree(temp_dir)
+                    if temp_dir and os.path.exists(temp_dir):
+                        shutil.rmtree(temp_dir)
         except Exception as e:
             return f"Error during Groq API processing: {e}", None, None, None
+
 
 def background_transcription_job(
     job_id, url, file, dir, lang, model_choice, local_model, groq_model, translate
@@ -352,6 +435,7 @@ def background_transcription_job(
         with job_store_lock:
             job_store[job_id]["status"] = "failed"
             job_store[job_id]["result"] = {"error": str(e)}
+
 
 with gr.Blocks(title="Video Transcriber") as app:
     gr.Markdown("# Multi-Language Video Transcriber")
@@ -540,15 +624,32 @@ with gr.Blocks(title="Video Transcriber") as app:
 
 # Mount FastAPI app for custom endpoints
 import uvicorn
+import argparse
 
-def run_app():
+
+import os
+
+def run_app(server_port, api_port):
+    gradio_port = int(os.environ.get("GRADIO_SERVER_PORT", server_port))
     gradio_server = threading.Thread(
         target=app.launch,
-        kwargs={"server_name": "127.0.0.1", "server_port": 7860},
+        kwargs={"server_name": "127.0.0.1", "server_port": gradio_port},
         daemon=True,
     )
     gradio_server.start()
-    uvicorn.run(fastapi_app, host="127.0.0.1", port=7861)
+    try:
+        uvicorn.run(fastapi_app, host="127.0.0.1", port=int(api_port))
+    except Exception as e:
+        print(f"Failed to start FastAPI server on port {api_port}: {e}")
+
 
 if __name__ == "__main__":
-    run_app()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--server_port", type=int, default=7860, help="Gradio server port"
+    )
+    parser.add_argument(
+        "--api_port", type=int, default=7861, help="FastAPI server port"
+    )
+    args = parser.parse_args()
+    run_app(args.server_port, args.api_port)

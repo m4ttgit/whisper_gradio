@@ -2,6 +2,7 @@ import os
 import shutil
 from pathlib import Path
 from dotenv import load_dotenv
+import time
 import whisper
 import groq
 import json
@@ -12,7 +13,6 @@ load_dotenv()
 
 GROQ_CLIENT = None
 WHISPER_MODEL = None
-MODEL_SIZE = "medium"
 DEFAULT_OUTPUT_DIR = os.path.join(os.getcwd(), "outputs")
 
 
@@ -33,11 +33,11 @@ def load_groq_client():
         return None
 
 
-def load_whisper_model():
+def load_whisper_model(model_name="medium"):
     global WHISPER_MODEL
     if WHISPER_MODEL is None:
-        print(f"Loading Whisper model: {MODEL_SIZE}...")
-        WHISPER_MODEL = whisper.load_model(MODEL_SIZE)
+        print(f"Loading Whisper model: {model_name}...")
+        WHISPER_MODEL = whisper.load_model(model_name)
         print("Whisper model loaded.")
 
 
@@ -51,14 +51,30 @@ def save_output_files(
     text_path = output_path / f"{video_name}.txt"
     srt_path = output_path / f"{video_name}.srt"
 
-    shutil.copy2(source_video_path, str(video_path))
+    retries = 3
+    for attempt in range(retries):
+        try:
+            shutil.copy2(source_video_path, str(video_path))
+            print(f"Video saved to {video_path}")
+            break  # If successful, break out of the retry loop
+        except PermissionError as e:
+            if attempt < retries - 1:  # If not the last attempt
+                print(f"Attempt {attempt + 1} failed: {e}. Retrying in 1 second...")
+                time.sleep(1)  # Wait for 1 second before retrying
+            else:  # If it's the last attempt, raise the exception
+                print(f"Failed to copy video after {retries} attempts.")
+                raise  # Re-raise the exception to be caught by the caller
+
     text_path.write_text(transcription_text.strip(), encoding="utf-8")
     srt_path.write_text(srt_content, encoding="utf-8")
 
     return str(video_path), str(text_path), str(srt_path)
 
 
-def transcribe_local_video(video_path, output_dir=DEFAULT_OUTPUT_DIR, language="auto"):
+def transcribe_local_video(video_path, output_dir=DEFAULT_OUTPUT_DIR, language="auto", model_name="medium"):
+    global WHISPER_MODEL
+    if WHISPER_MODEL is None:
+        load_whisper_model(model_name)
     if not WHISPER_MODEL:
         print("Error: Whisper model not loaded.")
         return "Error: Whisper model not loaded.", None, None
@@ -92,10 +108,12 @@ def transcribe_local_video(video_path, output_dir=DEFAULT_OUTPUT_DIR, language="
     return transcription_text, srt_path, text_path, str(video_path_out)
 
 
-def transcribe_video_from_url(url, output_dir=DEFAULT_OUTPUT_DIR, language="auto"):
+def transcribe_video_from_url(url, output_dir=DEFAULT_OUTPUT_DIR, language="auto", model_name="medium"):
     import tempfile
     import yt_dlp
-
+    global WHISPER_MODEL
+    if WHISPER_MODEL is None:
+        load_whisper_model(model_name)
     if not WHISPER_MODEL:
         print("Error: Whisper model not loaded.")
         return "Error: Whisper model not loaded.", None, None
@@ -103,23 +121,78 @@ def transcribe_video_from_url(url, output_dir=DEFAULT_OUTPUT_DIR, language="auto
     if not url:
         return "Please enter a video URL.", None, None
 
-    using_default = not output_dir or output_dir == DEFAULT_OUTPUT_DIR
-
     temp_dir = tempfile.mkdtemp()
     try:
-        ydl_opts = {
-            "format": "best",
+        # Modern yt-dlp configuration with updated strategies
+        base_opts = {
+            "format": "best[height<=720]/best",
             "outtmpl": os.path.join(temp_dir, "%(title)s.%(ext)s"),
-            "quiet": False,
-            "progress": True,
+            "quiet": True,
+            "no_warnings": True,
+            "extractaudio": False,
+            "audioformat": "mp3",
+            "embed_subs": False,
+            "writesubtitles": False,
+            "writeautomaticsub": False,
         }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            video_title = info.get("title", "downloaded_video")
-            downloaded_files = os.listdir(temp_dir)
-            if not downloaded_files:
-                raise FileNotFoundError("No file found after download.")
-            temp_video_path = os.path.join(temp_dir, downloaded_files[0])
+
+        success = False
+        temp_video_path = None
+        video_title = "downloaded_video"
+
+        # Try different strategies with latest yt-dlp features
+        strategies = [
+            # Strategy 1: Basic with updated user agent
+            {
+                "name": "basic_updated",
+                "opts": {**base_opts, "http_headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"}}
+            },
+            # Strategy 2: Use different format with fallback
+            {
+                "name": "format_fallback", 
+                "opts": {**base_opts, "format": "worst[height>=360]/worst"}
+            },
+            # Strategy 3: Audio-only as last resort
+            {
+                "name": "audio_only",
+                "opts": {**base_opts, "format": "bestaudio/best"}
+            }
+        ]
+
+        for strategy in strategies:
+            if success:
+                break
+                
+            print(f"Trying {strategy['name']} strategy...")
+            try:
+                with yt_dlp.YoutubeDL(strategy['opts']) as ydl:
+                    info = ydl.extract_info(url, download=True)
+                    video_title = info.get("title", "downloaded_video")
+                    
+                    # Find downloaded file
+                    downloaded_files = [f for f in os.listdir(temp_dir) if os.path.isfile(os.path.join(temp_dir, f))]
+                    if downloaded_files:
+                        temp_video_path = os.path.join(temp_dir, downloaded_files[0])
+                        print(f"SUCCESS: Downloaded using {strategy['name']} strategy")
+                        success = True
+                        
+            except Exception as e:
+                print(f"FAILED {strategy['name']}: {str(e)[:100]}...")
+                continue
+
+        if not success:
+            return "Failed to download video. The video may be private, geo-blocked, or temporarily unavailable. Try updating yt-dlp with: pip install --upgrade yt-dlp", None, None, None
+
+        # Verify the downloaded file exists and is valid
+        if not temp_video_path or not os.path.exists(temp_video_path):
+            return "Download appeared successful but video file not found.", None, None, None
+            
+        file_size = os.path.getsize(temp_video_path)
+        if file_size < 1024:  # Less than 1KB is likely an error
+            return "Downloaded file is too small, likely corrupted.", None, None, None
+            
+        safe_filename = ''.join(c for c in os.path.basename(temp_video_path) if ord(c) < 128)
+        print(f"Downloaded video: {safe_filename} ({file_size} bytes)")
 
         whisper_language = None if language == "auto" else language
         result = WHISPER_MODEL.transcribe(
@@ -133,7 +206,6 @@ def transcribe_video_from_url(url, output_dir=DEFAULT_OUTPUT_DIR, language="auto
             c for c in video_title if c.isalnum() or c in (" ", "-", "_")
         ).strip()
 
-        # If output_dir is not provided, use cwd, else use as-is (no subfolder)
         if not output_dir:
             output_dir = os.getcwd()
 
@@ -215,4 +287,5 @@ def transcribe_with_groq(
 
     finally:
         if temp_flac and os.path.exists(temp_flac.name):
+            os.unlink(temp_flac.name)
             os.unlink(temp_flac.name)
