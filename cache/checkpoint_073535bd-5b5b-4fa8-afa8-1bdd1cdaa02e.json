@@ -1,0 +1,185 @@
+{
+  "completed_segments": [
+    9
+  ],
+  "partial_results": [
+    {
+      "text": "\u300a\u9752\u5e74\u6210\u529f\u7c89\u7d72",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 0.0,
+          "end": 2.0,
+          "text": "\u300a\u9752\u5e74\u6210\u529f\u7c89\u7d72",
+          "tokens": [
+            50364,
+            9806,
+            37462,
+            5157,
+            11336,
+            32311,
+            32993,
+            6948,
+            110,
+            50464
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.7220405231822621,
+          "compression_ratio": 0.65625,
+          "no_speech_prob": 0.38632136583328247
+        }
+      ],
+      "segment_id": 0,
+      "start_time": 0,
+      "duration": 30
+    },
+    {
+      "text": "",
+      "segments": [],
+      "segment_id": 1,
+      "start_time": 30,
+      "duration": 30,
+      "error": "Error transcribing segment 1: Linear(in_features=1024, out_features=1024, bias=True)"
+    },
+    {
+      "text": "",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 60.0,
+          "end": 90.0,
+          "text": "",
+          "tokens": [],
+          "temperature": 0.0,
+          "avg_logprob": -0.38290315866470337,
+          "compression_ratio": 0.0,
+          "no_speech_prob": 0.15006868541240692,
+          "words": []
+        }
+      ],
+      "segment_id": 2,
+      "start_time": 60,
+      "duration": 30
+    },
+    {
+      "text": "",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 90.0,
+          "end": 120.0,
+          "text": "",
+          "tokens": [],
+          "temperature": 0.0,
+          "avg_logprob": -0.3328135907649994,
+          "compression_ratio": 0.0,
+          "no_speech_prob": 0.26069527864456177,
+          "words": []
+        }
+      ],
+      "segment_id": 3,
+      "start_time": 90,
+      "duration": 30
+    },
+    {
+      "text": "",
+      "segments": [],
+      "segment_id": 4,
+      "start_time": 120,
+      "duration": 30,
+      "error": "Error transcribing segment 4: Linear(in_features=1024, out_features=1024, bias=True)"
+    },
+    {
+      "text": "",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 150.0,
+          "end": 180.0,
+          "text": "",
+          "tokens": [],
+          "temperature": 0.0,
+          "avg_logprob": -0.5870198607444763,
+          "compression_ratio": 0.0,
+          "no_speech_prob": 0.2229231297969818,
+          "words": []
+        }
+      ],
+      "segment_id": 5,
+      "start_time": 150,
+      "duration": 30
+    },
+    {
+      "text": "",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 180.0,
+          "end": 210.0,
+          "text": "",
+          "tokens": [],
+          "temperature": 0.0,
+          "avg_logprob": -0.6420905590057373,
+          "compression_ratio": 0.0,
+          "no_speech_prob": 0.5262597799301147,
+          "words": []
+        }
+      ],
+      "segment_id": 6,
+      "start_time": 180,
+      "duration": 30
+    },
+    {
+      "text": "",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 210.0,
+          "end": 240.0,
+          "text": "",
+          "tokens": [],
+          "temperature": 0.0,
+          "avg_logprob": -0.23445263504981995,
+          "compression_ratio": 0.0,
+          "no_speech_prob": 0.9366975426673889,
+          "words": []
+        }
+      ],
+      "segment_id": 7,
+      "start_time": 210,
+      "duration": 30
+    },
+    {
+      "text": "",
+      "segments": [],
+      "segment_id": 8,
+      "start_time": 240,
+      "duration": 30,
+      "error": "Error transcribing segment 8: cannot reshape tensor of 0 elements into shape [1, 0, 16, -1] because the unspecified dimension size -1 can be any value and is ambiguous"
+    },
+    {
+      "text": "",
+      "segments": [],
+      "segment_id": 9,
+      "start_time": 270,
+      "duration": 30,
+      "error": "Error transcribing segment 9: Linear(in_features=1024, out_features=1024, bias=True)"
+    }
+  ],
+  "last_updated": 1757257228.1598806,
+  "total_segments": 12,
+  "current_segment": 9,
+  "job_params": {
+    "source_url": "https://www.youtube.com/watch?v=ZFL3TotDqpk",
+    "source_file": null,
+    "output_dir": "D:/Projects/acsm/exmilton_gordon/\u4e00\u9996\u9752\u5e74\u8056\u6b4c\uff0c\u4e00\u500b\u6545\u4e8b\uff1a\u300a\u842c\u53e4\u78d0\u77f3\u300b",
+    "language": "zh",
+    "model_name": "medium"
+  }
+}

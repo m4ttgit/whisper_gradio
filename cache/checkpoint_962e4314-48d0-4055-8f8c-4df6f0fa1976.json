@@ -1,0 +1,102 @@
+{
+  "completed_segments": [
+    0
+  ],
+  "partial_results": [
+    {
+      "text": " \ub192\u5e38\u795d\u798f\u6bcf\u5929,\u6bcf\u5929\u90fd\u80fd\u6d3b\u5728\u4f60\u8eab\u908a\u795d\u798f\u6bcf\u5929,\u6bcf\u5929\u90fd\u80fd\u6d3b\u5728\u4f60\u8eab\u908a",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 0.0,
+          "end": 3.68,
+          "text": " \ub192\u5e38",
+          "tokens": [
+            50364,
+            25015,
+            11279,
+            50548
+          ],
+          "temperature": 1.0,
+          "avg_logprob": -5.50174077351888,
+          "compression_ratio": 0.42857142857142855,
+          "no_speech_prob": 0.49954891204833984
+        },
+        {
+          "id": 1,
+          "seek": 368,
+          "start": 3.68,
+          "end": 22.68,
+          "text": "\u795d\u798f\u6bcf\u5929,\u6bcf\u5929\u90fd\u80fd\u6d3b\u5728\u4f60\u8eab\u908a",
+          "tokens": [
+            50364,
+            12695,
+            251,
+            33952,
+            23664,
+            6135,
+            11,
+            23664,
+            6135,
+            7182,
+            8225,
+            25956,
+            3581,
+            2166,
+            19847,
+            14901,
+            51314
+          ],
+          "temperature": 0.2,
+          "avg_logprob": -0.9897188459123883,
+          "compression_ratio": 1.6,
+          "no_speech_prob": 0.39865028858184814
+        },
+        {
+          "id": 2,
+          "seek": 368,
+          "start": 22.68,
+          "end": 29.68,
+          "text": "\u795d\u798f\u6bcf\u5929,\u6bcf\u5929\u90fd\u80fd\u6d3b\u5728\u4f60\u8eab\u908a",
+          "tokens": [
+            51314,
+            12695,
+            251,
+            33952,
+            23664,
+            6135,
+            11,
+            23664,
+            6135,
+            7182,
+            8225,
+            25956,
+            3581,
+            2166,
+            19847,
+            14901,
+            51664
+          ],
+          "temperature": 0.2,
+          "avg_logprob": -0.9897188459123883,
+          "compression_ratio": 1.6,
+          "no_speech_prob": 0.39865028858184814
+        }
+      ],
+      "segment_id": 0,
+      "start_time": 0,
+      "duration": 30
+    }
+  ],
+  "last_updated": 1757239374.1298509,
+  "total_segments": 7,
+  "current_segment": 0,
+  "job_params": {
+    "source_url": "https://www.youtube.com/watch?v=bYcPa-RgjkM",
+    "source_file": null,
+    "output_dir": "D:/Projects/acsm/exmilton_gordon/\u3010\u9752\u5e74\u8056\u6b4c \u3011\u6bcf\u4e00\u5929",
+    "language": "zh",
+    "model_name": "medium"
+  }
+}

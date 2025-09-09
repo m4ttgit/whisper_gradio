@@ -1,0 +1,458 @@
+{
+  "completed_segments": [
+    1
+  ],
+  "partial_results": [
+    {
+      "text": "\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u5531\u4ec0\u9ebc\u8a69\u6b4c\u5440?\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u8b1b\u4ec0\u9ebc\u6545\u4e8b\u5440?\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u80cc\u5f8c\u7684\u6545\u4e8b\u591a\u5c11\u9996\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u5440?52\u9996\u54e6! \u90a3\u591a\u5c11\u500b\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u6545\u4e8b\u5440?52\u500b\u5629! \u90a3\u591a\u5c11\u500b\u4e3b\u6301\u4eba\u5440?15\u4f4d\u5440\u4e00\u9996\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u4e00\u500b\u6545\u4e8b\u6bcf\u4e00\u4f4d",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 0.0,
+          "end": 3.0,
+          "text": "\u300a\u9752\u5e74\u59d3\u6b4c\u300b",
+          "tokens": [
+            50364,
+            9806,
+            37462,
+            5157,
+            7795,
+            241,
+            29582,
+            9782,
+            50514
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 1,
+          "seek": 0,
+          "start": 3.0,
+          "end": 5.0,
+          "text": "\u5531\u4ec0\u9ebc\u8a69\u6b4c\u5440?",
+          "tokens": [
+            50514,
+            39861,
+            7598,
+            6716,
+            102,
+            29582,
+            15348,
+            30,
+            50614
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 2,
+          "seek": 0,
+          "start": 5.0,
+          "end": 6.5,
+          "text": "\u300a\u9752\u5e74\u59d3\u6b4c\u300b",
+          "tokens": [
+            50614,
+            9806,
+            37462,
+            5157,
+            7795,
+            241,
+            29582,
+            9782,
+            50689
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 3,
+          "seek": 0,
+          "start": 6.5,
+          "end": 8.0,
+          "text": "\u8b1b\u4ec0\u9ebc\u6545\u4e8b\u5440?",
+          "tokens": [
+            50689,
+            11932,
+            7598,
+            43045,
+            6973,
+            15348,
+            30,
+            50764
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 4,
+          "seek": 0,
+          "start": 8.0,
+          "end": 10.5,
+          "text": "\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u80cc\u5f8c\u7684\u6545\u4e8b",
+          "tokens": [
+            50764,
+            9806,
+            37462,
+            5157,
+            7795,
+            241,
+            29582,
+            9782,
+            46329,
+            5661,
+            1546,
+            43045,
+            6973,
+            50889
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 5,
+          "seek": 0,
+          "start": 10.5,
+          "end": 13.0,
+          "text": "\u591a\u5c11\u9996\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u5440?",
+          "tokens": [
+            50889,
+            41492,
+            25444,
+            9806,
+            37462,
+            5157,
+            7795,
+            241,
+            29582,
+            9782,
+            15348,
+            30,
+            51014
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 6,
+          "seek": 0,
+          "start": 13.0,
+          "end": 14.0,
+          "text": "52\u9996",
+          "tokens": [
+            51014,
+            17602,
+            25444,
+            51064
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 7,
+          "seek": 0,
+          "start": 14.0,
+          "end": 17.5,
+          "text": "\u54e6! \u90a3\u591a\u5c11\u500b\u300a\u9752\u5e74\u59d3\u6b4c\u300b\u6545\u4e8b\u5440?",
+          "tokens": [
+            51064,
+            14659,
+            0,
+            18625,
+            41492,
+            3338,
+            9806,
+            37462,
+            5157,
+            7795,
+            241,
+            29582,
+            9782,
+            43045,
+            6973,
+            15348,
+            30,
+            51239
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 8,
+          "seek": 0,
+          "start": 17.5,
+          "end": 19.0,
+          "text": "52\u500b",
+          "tokens": [
+            51239,
+            17602,
+            3338,
+            51314
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 9,
+          "seek": 0,
+          "start": 19.0,
+          "end": 22.0,
+          "text": "\u5629! \u90a3\u591a\u5c11\u500b\u4e3b\u6301\u4eba\u5440?",
+          "tokens": [
+            51314,
+            10756,
+            102,
+            0,
+            18625,
+            41492,
+            3338,
+            13557,
+            17694,
+            4035,
+            15348,
+            30,
+            51464
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 10,
+          "seek": 0,
+          "start": 22.0,
+          "end": 24.0,
+          "text": "15\u4f4d\u5440",
+          "tokens": [
+            51464,
+            5211,
+            11160,
+            15348,
+            51564
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 11,
+          "seek": 0,
+          "start": 25.0,
+          "end": 27.0,
+          "text": "\u4e00\u9996\u300a\u9752\u5e74\u59d3\u6b4c\u300b",
+          "tokens": [
+            51614,
+            2257,
+            25444,
+            9806,
+            37462,
+            5157,
+            7795,
+            241,
+            29582,
+            9782,
+            51714
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 12,
+          "seek": 0,
+          "start": 27.0,
+          "end": 29.0,
+          "text": "\u4e00\u500b\u6545\u4e8b",
+          "tokens": [
+            51714,
+            8990,
+            43045,
+            6973,
+            51814
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.20334514494865172,
+          "compression_ratio": 1.7919463087248322,
+          "no_speech_prob": 0.5280815362930298
+        },
+        {
+          "id": 13,
+          "seek": 2900,
+          "start": 29.0,
+          "end": 30.0,
+          "text": "\u6bcf\u4e00\u4f4d",
+          "tokens": [
+            50364,
+            23664,
+            2257,
+            11160,
+            50414
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.18231749534606934,
+          "compression_ratio": 0.5294117647058824,
+          "no_speech_prob": 0.7851487994194031
+        }
+      ],
+      "segment_id": 0,
+      "start_time": 0,
+      "duration": 30
+    },
+    {
+      "text": "\u662f\u9752\u5e74\u6210\u529f\u7c89\u7d72\u7684\u4f60\u4e0d\u53ef\u4ee5\u932f\u904e\u7684\u4e00\u500b\u96fb\u53f0\u7bc0\u76ee\u4e3b \u6211\u9858\u50cf\u4f60\u4e3b \u6211\u9858\u50cf\u4f60\u9019\u9996\u8a69\u662f\u7531\u5169\u500b\u4f5c\u8005\u4e00\u8d77\u4f5c\u7684",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 30.0,
+          "end": 32.0,
+          "text": "\u662f\u9752\u5e74\u6210\u529f\u7c89\u7d72\u7684\u4f60",
+          "tokens": [
+            50364,
+            1541,
+            37462,
+            5157,
+            11336,
+            32311,
+            32993,
+            6948,
+            110,
+            1546,
+            2166,
+            50464
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.43396441141764325,
+          "compression_ratio": 1.0326086956521738,
+          "no_speech_prob": 0.43597257137298584
+        },
+        {
+          "id": 1,
+          "seek": 0,
+          "start": 32.0,
+          "end": 36.0,
+          "text": "\u4e0d\u53ef\u4ee5\u932f\u904e\u7684\u4e00\u500b\u96fb\u53f0\u7bc0\u76ee",
+          "tokens": [
+            50464,
+            1960,
+            6723,
+            13133,
+            8816,
+            1546,
+            8990,
+            20545,
+            15433,
+            42567,
+            50664
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.43396441141764325,
+          "compression_ratio": 1.0326086956521738,
+          "no_speech_prob": 0.43597257137298584
+        },
+        {
+          "id": 2,
+          "seek": 0,
+          "start": 44.0,
+          "end": 46.0,
+          "text": "\u4e3b \u6211\u9858\u50cf\u4f60",
+          "tokens": [
+            51064,
+            13557,
+            8624,
+            20692,
+            12760,
+            2166,
+            51164
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.43396441141764325,
+          "compression_ratio": 1.0326086956521738,
+          "no_speech_prob": 0.43597257137298584
+        },
+        {
+          "id": 3,
+          "seek": 0,
+          "start": 54.0,
+          "end": 56.0,
+          "text": "\u4e3b \u6211\u9858\u50cf\u4f60",
+          "tokens": [
+            51564,
+            13557,
+            8624,
+            20692,
+            12760,
+            2166,
+            51664
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.43396441141764325,
+          "compression_ratio": 1.0326086956521738,
+          "no_speech_prob": 0.43597257137298584
+        },
+        {
+          "id": 4,
+          "seek": 2600,
+          "start": 56.0,
+          "end": 59.0,
+          "text": "\u9019\u9996\u8a69\u662f\u7531\u5169\u500b\u4f5c\u8005\u4e00\u8d77\u4f5c\u7684",
+          "tokens": [
+            50364,
+            2664,
+            25444,
+            6716,
+            102,
+            1541,
+            23786,
+            34623,
+            11914,
+            12444,
+            29567,
+            11914,
+            1546,
+            50514
+          ],
+          "temperature": 0.0,
+          "avg_logprob": -0.1252500851949056,
+          "compression_ratio": 0.78,
+          "no_speech_prob": 0.12088506668806076
+        }
+      ],
+      "segment_id": 1,
+      "start_time": 30,
+      "duration": 30
+    }
+  ],
+  "last_updated": 1757398737.7079754,
+  "total_segments": 12,
+  "current_segment": 1,
+  "job_params": {
+    "source_url": "https://www.youtube.com/watch?v=vVFDVZtC0b0",
+    "source_file": null,
+    "output_dir": "D:/Projects/acsm/exmilton_gordon/\u4e00\u9996\u9752\u5e74\u8056\u6b4c\uff0c\u4e00\u500b\u6545\u4e8b\uff1a\u300a\u4e3b\uff0c\u6211\u9858\u50cf\u7962\u300b",
+    "language": "zh",
+    "model_name": "medium"
+  }
+}

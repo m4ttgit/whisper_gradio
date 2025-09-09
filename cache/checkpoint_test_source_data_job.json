@@ -1,0 +1,21 @@
+{
+  "completed_segments": [
+    0
+  ],
+  "partial_results": [
+    {
+      "text": "test",
+      "segment_id": 0
+    }
+  ],
+  "last_updated": 1757228889.528054,
+  "total_segments": 5,
+  "current_segment": 0,
+  "job_params": {
+    "source_url": "https://www.youtube.com/watch?v=test123",
+    "source_file": null,
+    "output_dir": "d:\\Projects\\whisper_gradio\\outputs",
+    "language": "auto",
+    "model_name": "medium"
+  }
+}

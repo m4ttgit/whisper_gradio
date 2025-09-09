@@ -1,0 +1,19 @@
+{
+  "completed_segments": [
+    0,
+    1
+  ],
+  "partial_results": [
+    {
+      "text": "First segment text",
+      "segment_id": 0
+    },
+    {
+      "text": "Second segment text",
+      "segment_id": 1
+    }
+  ],
+  "last_updated": 1757224703.220365,
+  "total_segments": 5,
+  "current_segment": 2
+}

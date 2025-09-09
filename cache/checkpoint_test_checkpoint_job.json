@@ -1,0 +1,15 @@
+{
+  "completed_segments": [
+    0,
+    1,
+    2
+  ],
+  "partial_results": [
+    {
+      "text": "test result"
+    }
+  ],
+  "last_updated": 1757224703.2053661,
+  "total_segments": 10,
+  "current_segment": 3
+}

@@ -6,6 +6,7 @@ import time
 import whisper
 import groq
 import json
+import hashlib
 
 from utils import format_timestamp, generate_srt_content
 
@@ -14,6 +15,7 @@ load_dotenv()
 GROQ_CLIENT = None
 WHISPER_MODEL = None
 DEFAULT_OUTPUT_DIR = os.path.join(os.getcwd(), "outputs")
+CACHE_DIR = os.path.join(os.getcwd(), "cache")
 
 
 def load_groq_client():
@@ -39,6 +41,38 @@ def load_whisper_model(model_name="medium"):
         print(f"Loading Whisper model: {model_name}...")
         WHISPER_MODEL = whisper.load_model(model_name)
         print("Whisper model loaded.")
+
+
+def get_cache_key(audio_path, language, model, translate=False):
+    """Generate a unique cache key for transcription results"""
+    content = f"{audio_path}:{language}:{model}:{translate}"
+    return hashlib.md5(content.encode()).hexdigest()
+
+
+def save_to_cache(cache_key, result):
+    """Save transcription result to cache"""
+    try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        cache_file = os.path.join(CACHE_DIR, f"{cache_key}.json")
+        with open(cache_file, 'w') as f:
+            json.dump(result, f, indent=2)
+        print(f"Saved result to cache: {cache_key}")
+    except Exception as e:
+        print(f"Error saving to cache: {e}")
+
+
+def load_from_cache(cache_key):
+    """Load transcription result from cache"""
+    try:
+        cache_file = os.path.join(CACHE_DIR, f"{cache_key}.json")
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r') as f:
+                result = json.load(f)
+            print(f"Loaded result from cache: {cache_key}")
+            return result
+    except Exception as e:
+        print(f"Error loading from cache: {e}")
+    return None
 
 
 def save_output_files(
@@ -123,7 +157,7 @@ def transcribe_video_from_url(url, output_dir=DEFAULT_OUTPUT_DIR, language="auto
 
     temp_dir = tempfile.mkdtemp()
     try:
-        # Modern yt-dlp configuration with updated strategies
+        # Modern yt-dlp configuration with updated strategies and resume support
         base_opts = {
             "format": "best[height<=720]/best",
             "outtmpl": os.path.join(temp_dir, "%(title)s.%(ext)s"),
@@ -134,6 +168,8 @@ def transcribe_video_from_url(url, output_dir=DEFAULT_OUTPUT_DIR, language="auto
             "embed_subs": False,
             "writesubtitles": False,
             "writeautomaticsub": False,
+            "continue_dl": True,  # Enable download resume
+            "no_part": True,      # Don't use .part files
         }
 
         success = False
@@ -220,7 +256,7 @@ def transcribe_video_from_url(url, output_dir=DEFAULT_OUTPUT_DIR, language="auto
 
 
 def transcribe_with_groq(
-    audio_path, language="auto", model="whisper-large-v3-turbo", translate=False
+    audio_path, language="auto", model="whisper-large-v3-turbo", translate=False, progress_callback=None
 ):
     import subprocess
     from tempfile import NamedTemporaryFile
@@ -230,8 +266,19 @@ def transcribe_with_groq(
     if GROQ_CLIENT is None:
         raise RuntimeError("Groq client not initialized. Please check your API key.")
 
+    # Check cache first
+    cache_key = get_cache_key(audio_path, language, model, translate)
+    cached_result = load_from_cache(cache_key)
+    if cached_result:
+        if progress_callback:
+            progress_callback(90)  # Skip to end if cached
+        return cached_result
+
     temp_flac = NamedTemporaryFile(suffix=".flac", delete=False)
     try:
+        if progress_callback:
+            progress_callback(60)  # Audio conversion started
+
         subprocess.run(
             [
                 "ffmpeg",
@@ -254,6 +301,9 @@ def transcribe_with_groq(
             capture_output=True,
         )
         temp_flac.close()
+
+        if progress_callback:
+            progress_callback(70)  # Audio conversion complete
 
         with open(temp_flac.name, "rb") as audio_file:
             file_content = audio_file.read()
@@ -279,11 +329,22 @@ def transcribe_with_groq(
                 temperature=0.0,
             ).model_dump_json()
 
+        if progress_callback:
+            progress_callback(80)  # Transcription API call started
+
         response_dict = json.loads(response)
         transcription_text = response_dict.get("text", "").strip()
         segments = response_dict.get("segments", [])
 
-        return {"text": transcription_text, "segments": segments}
+        if progress_callback:
+            progress_callback(90)  # Transcription complete
+
+        result = {"text": transcription_text, "segments": segments}
+
+        # Save to cache
+        save_to_cache(cache_key, result)
+
+        return result
 
     finally:
         if temp_flac and os.path.exists(temp_flac.name):

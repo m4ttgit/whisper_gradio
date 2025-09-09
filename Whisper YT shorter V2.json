@@ -1,0 +1,989 @@
+{
+  "name": "Whisper YT shorter V2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        -128
+      ],
+      "id": "be561c9d-4151-4368-b4d4-c25dd53f0764",
+      "name": "When clicking 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:7863/gradio/incomplete_jobs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -912,
+        -128
+      ],
+      "id": "60e9f631-dc56-4cac-ab8b-9cb5932d506e",
+      "name": "Check Incomplete Jobs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if there are incomplete jobs\nconst incompleteJobs = $input.first().json;\n\nif (incompleteJobs.count > 0) {\n  return {\n    hasIncompleteJobs: true,\n    jobCount: incompleteJobs.count,\n    jobIds: incompleteJobs.incomplete_jobs\n  };\n} else {\n  return {\n    hasIncompleteJobs: false,\n    jobCount: 0,\n    jobIds: []\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -544,
+        -128
+      ],
+      "id": "3d948fee-f91e-45af-b99d-3c8017ff0e22",
+      "name": "Process Resume Decision"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:7863/gradio/resume_job",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"job_id\": \"{{ $json.jobIds[0] }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -368,
+        -128
+      ],
+      "id": "5dd312a6-bb66-480c-9832-865160ac0ea7",
+      "name": "Resume Job"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc",
+          "mode": "list",
+          "cachedResultName": "acsmht_unique_rows",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 68731048,
+          "mode": "list",
+          "cachedResultName": "test4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit#gid=68731048"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1040,
+        144
+      ],
+      "id": "f86f21a0-ae98-4d26-9a8a-f5a898d2e680",
+      "name": "Google Sheets",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MpbvyDUP1FRm8HRw",
+          "name": "Google Sheets account m4tthias@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "745a2790-5319-4848-b686-3a01462c0dd2",
+              "name": "urls",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "d2a83ac6-c09f-4473-8a5b-d509e01f6393",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "48ec819f-5926-44e5-8040-1e965482e401",
+              "name": "Processed",
+              "value": "={{ $json.processed }}",
+              "type": "string"
+            },
+            {
+              "id": "e29851f5-1ea7-4f64-8e37-8c7559d0599e",
+              "name": "dir",
+              "value": "D:/Projects/acsm/exmilton_gordon/",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -848,
+        144
+      ],
+      "id": "67b46d1b-ed80-44ac-8087-0c710b94d998",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -400,
+        144
+      ],
+      "id": "dac0a26d-d404-4d64-b0c9-bfc3ef35661d",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:7863/gradio/handle_transcription",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [\n    {\n      \"url\": \"{{ $('Loop Over Items').item.json.urls }}\",\n      \"dir\": \"{{ $('Create Folder1').item.json.folderPath }}\",\n      \"lang\": \"Chinese\",\n      \"model_choice\": \"Local Whisper\",\n      \"local_model\": \"medium\",\n      \"groq_model\": \"whisper-large-v3\",\n      \"translate\": false\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1072,
+        432
+      ],
+      "id": "33b7ac1a-c9fe-46e4-8d52-4352cbef2354",
+      "name": "Whisper Transcribe",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:7861/gradio/job_details",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "job_id",
+              "value": "={{ $('Whisper Transcribe').item.json.job_ids[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -848,
+        432
+      ],
+      "id": "4268564f-d047-4730-8a82-22e1eb36d3b0",
+      "name": "Job Details"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input item\nconst inputData = $input.first().json;\n\n// Extract and sanitize values\nconst rawDir = (inputData.dir || \"$input.first().json.dir\").trim().replace(/\\\\/g, \"/\");\nconst rawTitle = (inputData.title || \"$input.first().json.title\").trim();\n\n// Validate input\nif (!rawDir || !rawTitle) {\n  throw new Error(\"Missing 'dir' or 'title'\");\n}\n\n// Sanitize illegal characters in title (for folder/file name safety)\nconst sanitizedTitle = rawTitle.replace(/[<>:\"/\\\\|?*\\x00-\\x1F]/g, \"\").replace(/\\s+/g, \" \").trim();\n\n// Optional: ensure the dir ends with a slash\nconst dir = rawDir.endsWith(\"/\") ? rawDir : `${rawDir}/`;\n\n// Build full folder path\nconst fullPath = `${dir}${sanitizedTitle}`;\n\n// Output the constructed path\nreturn {\n  folderPath: fullPath\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        160
+      ],
+      "id": "faf2faa6-905f-46ac-8634-d06f013a50e5",
+      "name": "Create Folder1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a7abe500-a7c7-4ff6-9f34-0074129d5578",
+              "leftValue": "={{ $json.Processed }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -624,
+        144
+      ],
+      "id": "293110cf-ab0d-4ae1-a028-bd9e5d6f38bf",
+      "name": "If not Processed"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc",
+          "mode": "list",
+          "cachedResultName": "acsmhk_unique_rows",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 68731048,
+          "mode": "list",
+          "cachedResultName": "test4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit#gid=68731048"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "processed": "yes",
+            "url": "={{ $('Loop Over Items').item.json.urls }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processed",
+              "displayName": "displayName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -192,
+        416
+      ],
+      "id": "efd11eae-ee56-48a3-a0cf-1537bbb01f12",
+      "name": "Update Processed Status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MpbvyDUP1FRm8HRw",
+          "name": "Google Sheets account m4tthias@gmail.com"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        368
+      ],
+      "id": "70a59391-0ea1-4741-919c-5eeb29bdae10",
+      "name": "30 Seconds",
+      "webhookId": "6cc8c637-bafb-4d64-9cd4-8ae2a9f5b7ca"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "pending",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "8fa22519-0c7a-45c0-8589-aaee37459dd4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pending"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d16cbb47-4d81-46c7-8042-b4ab049cd418",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "complete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "complete"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f8dc980a-81ca-48b6-aa04-94340d81c2da",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "timeout",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "timeout"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -688,
+        384
+      ],
+      "id": "c3f56469-0123-4266-8c2c-dc6fc0a1ea46",
+      "name": "Switch",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "50ed497d-0711-4185-adb2-1743d783eefc",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -736,
+        -96
+      ],
+      "id": "ff7e05bf-b14b-4c42-85da-afad24dd011c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:7861/gradio/job_status",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "job_id",
+              "value": "={{ $('Resume Job').item.json.job_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -160,
+        -128
+      ],
+      "id": "d71a969e-e497-4631-a179-6376cc81b65f",
+      "name": "Job status1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "pending",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "8fa22519-0c7a-45c0-8589-aaee37459dd4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pending"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d16cbb47-4d81-46c7-8042-b4ab049cd418",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "complete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "complete"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f8dc980a-81ca-48b6-aa04-94340d81c2da",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "timeout",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "timeout"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        432,
+        272
+      ],
+      "id": "e4b16f90-8b4e-4519-85a6-c9812b67e130",
+      "name": "Switch1",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "retryOnFail": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        -16
+      ],
+      "id": "6ecb56bd-c3a7-4540-bfa4-092de0e8f626",
+      "name": "30 Seconds1",
+      "webhookId": "6cc8c637-bafb-4d64-9cd4-8ae2a9f5b7ca"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ab957238-480c-4a5c-8b99-721f5b93e90f",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "complete",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        -128
+      ],
+      "id": "6a15ed0a-2102-4973-ae8c-abb846f98617",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc",
+          "mode": "list",
+          "cachedResultName": "acsmhk_unique_rows",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 68731048,
+          "mode": "list",
+          "cachedResultName": "test4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EGkxO-qv4M32IeLIfWi-wRu03X4XbGRPsR5SV_gI6Zc/edit#gid=68731048"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "processed": "yes",
+            "url": "={{ $('Loop Over Items').item.json.urls }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        240,
+        -144
+      ],
+      "id": "a6dfb4c3-c024-473b-9242-bd874aae807f",
+      "name": "Update Processed Status1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MpbvyDUP1FRm8HRw",
+          "name": "Google Sheets account m4tthias@gmail.com"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Check Incomplete Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Incomplete Jobs": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Resume Decision": {
+      "main": [
+        [
+          {
+            "node": "Resume Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Job": {
+      "main": [
+        [
+          {
+            "node": "Job status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If not Processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create Folder1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whisper Transcribe": {
+      "main": [
+        [
+          {
+            "node": "Job status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job status": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Folder1": {
+      "main": [
+        [
+          {
+            "node": "Whisper Transcribe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If not Processed": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Processed Status": {
+      "main": [
+        [
+          {
+            "node": "30 Seconds",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "30 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Job status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "30 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Processed Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Process Resume Decision",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job status1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [],
+        [],
+        []
+      ]
+    },
+    "30 Seconds1": {
+      "main": [
+        [
+          {
+            "node": "Job status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update Processed Status1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "30 Seconds1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Processed Status1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0ce1f703-7255-4642-ba2b-93cd9ddc7c54",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "367ade3b4be6f21ffb1a756991fcdc914d8213e9345b5b839e14a8873782f190"
+  },
+  "id": "n8a4XLHodiwi8UbB",
+  "tags": [
+    {
+      "createdAt": "2025-09-06T04:10:33.921Z",
+      "updatedAt": "2025-09-06T04:10:33.921Z",
+      "id": "2SeXMN8ReN597Uu2",
+      "name": "enhanced resume workflow"
+    }
+  ]
+}

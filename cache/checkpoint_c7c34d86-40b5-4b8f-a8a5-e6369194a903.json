@@ -1,0 +1,46 @@
+{
+  "completed_segments": [
+    1
+  ],
+  "partial_results": [
+    {
+      "text": "",
+      "segments": [
+        {
+          "id": 0,
+          "seek": 0,
+          "start": 0.0,
+          "end": 30.0,
+          "text": "",
+          "tokens": [],
+          "temperature": 0.0,
+          "avg_logprob": -0.26181191205978394,
+          "compression_ratio": 0.0,
+          "no_speech_prob": 0.5000246167182922,
+          "words": []
+        }
+      ],
+      "segment_id": 0,
+      "start_time": 0,
+      "duration": 30
+    },
+    {
+      "text": "",
+      "segments": [],
+      "segment_id": 1,
+      "start_time": 30,
+      "duration": 30,
+      "error": "Error transcribing segment 1: Linear(in_features=1024, out_features=1024, bias=True)"
+    }
+  ],
+  "last_updated": 1757239424.8778708,
+  "total_segments": 7,
+  "current_segment": 1,
+  "job_params": {
+    "source_url": "https://www.youtube.com/watch?v=bYcPa-RgjkM",
+    "source_file": null,
+    "output_dir": "D:/Projects/acsm/exmilton_gordon/\u3010\u9752\u5e74\u8056\u6b4c \u3011\u6bcf\u4e00\u5929",
+    "language": "zh",
+    "model_name": "medium"
+  }
+}
